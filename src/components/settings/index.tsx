@@ -13,6 +13,7 @@ import { ScreenshotConfigs } from "./ScreenshotConfigs";
 import { AppIconToggle } from "./AppIconToggle";
 import { AlwaysOnTopToggle } from "./AlwaysOnTopToggle";
 import { TitleToggle } from "./TitleToggle";
+import { ScreenProtectionToggle } from "./ScreenProtectionToggle";
 import { AIProviders } from "./ai-configs";
 import { STTProviders } from "./stt-configs";
 import { DeleteChats } from "./DeleteChats";
@@ -68,6 +69,9 @@ export const Settings = () => {
 
             {/* Always On Top Toggle */}
             <AlwaysOnTopToggle />
+
+            {/* Screen Capture Protection Toggle */}
+            <ScreenProtectionToggle />
 
             {/* Title Toggle */}
             <TitleToggle />

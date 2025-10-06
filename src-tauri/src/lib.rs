@@ -4,6 +4,7 @@ mod api;
 mod shortcuts;
 mod window;
 mod db;
+mod screen_protection;
 use base64::Engine;
 use image::codecs::png::PngEncoder;
 use image::{ColorType, ImageEncoder};
@@ -67,6 +68,7 @@ pub fn run() {
     let posthog_api_key = option_env!("POSTHOG_API_KEY")
         .unwrap_or("")
         .to_string();
+    #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
         .plugin(
             tauri_plugin_sql::Builder::default()
@@ -131,7 +133,8 @@ pub fn run() {
             speaker::get_capture_status,
             speaker::get_audio_sample_rate,
             speaker::list_system_audio_devices,
-            speaker::get_default_audio_device
+            speaker::get_default_audio_device,
+            screen_protection::toggle_screen_protection
         ])
         .setup(|app| {
             // Setup main window positioning

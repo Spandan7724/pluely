@@ -14,6 +14,7 @@ export const STORAGE_KEYS = {
   SYSTEM_AUDIO_QUICK_ACTIONS: "system_audio_quick_actions",
   CUSTOMIZABLE: "customizable",
   PLUELY_API_ENABLED: "pluely_api_enabled",
+  SCREEN_PROTECTION_ENABLED: "screen_protection_enabled",
   SHORTCUTS: "shortcuts",
 } as const;
 

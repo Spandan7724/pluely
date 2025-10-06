@@ -135,7 +135,6 @@ impl SpeakerStream {
                         // Consistent buffer overflow handling
                         let dropped = {
                             let mut queue = sample_queue.lock().unwrap();
-                            let current_len = queue.len();
                             let max_buffer_size = 131072; // 128KB buffer (matching macOS)
                             
                             queue.extend(samples.iter());

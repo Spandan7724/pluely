@@ -45,4 +45,6 @@ export type IContextType = {
   hasActiveLicense: boolean;
   setHasActiveLicense: Dispatch<SetStateAction<boolean>>;
   getActiveLicenseStatus: () => Promise<void>;
+  screenProtectionEnabled: boolean;
+  setScreenProtectionEnabled: (enabled: boolean) => Promise<void>;
 };

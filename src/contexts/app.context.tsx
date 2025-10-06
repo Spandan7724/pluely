@@ -112,6 +112,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [pluelyApiEnabled, setPluelyApiEnabledState] = useState<boolean>(
     safeLocalStorage.getItem(STORAGE_KEYS.PLUELY_API_ENABLED) === "true"
   );
+  const [screenProtectionEnabled, setScreenProtectionEnabledState] =
+    useState<boolean>(true);
 
   const getActiveLicenseStatus = async () => {
     try {
@@ -202,6 +204,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (savedPluelyApiEnabled !== null) {
       setPluelyApiEnabledState(savedPluelyApiEnabled === "true");
     }
+
+    const savedScreenProtection = safeLocalStorage.getItem(
+      STORAGE_KEYS.SCREEN_PROTECTION_ENABLED
+    );
+    if (savedScreenProtection !== null) {
+      setScreenProtectionEnabledState(savedScreenProtection === "true");
+    } else {
+      setScreenProtectionEnabledState(true);
+    }
   };
 
   // Load data on mount
@@ -245,6 +256,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     applyCustomizableSettings();
   }, [customizable]);
+
+  useEffect(() => {
+    const applyScreenProtectionSetting = async () => {
+      try {
+        await invoke("toggle_screen_protection", {
+          enabled: screenProtectionEnabled,
+        });
+      } catch (error) {
+        console.debug("Failed to toggle screen protection:", error);
+      }
+    };
+
+    applyScreenProtectionSetting();
+  }, [screenProtectionEnabled]);
 
   // Listen for app icon hide/show events when window is toggled
   useEffect(() => {
@@ -396,6 +421,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     loadData();
   };
 
+  const setScreenProtectionEnabled = async (enabled: boolean) => {
+    setScreenProtectionEnabledState(enabled);
+    safeLocalStorage.setItem(
+      STORAGE_KEYS.SCREEN_PROTECTION_ENABLED,
+      String(enabled)
+    );
+  };
+
   // Create the context value (extend IContextType accordingly)
   const value: IContextType = {
     systemPrompt,
@@ -420,6 +453,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     hasActiveLicense,
     setHasActiveLicense: forceHasActiveLicense,
     getActiveLicenseStatus,
+    screenProtectionEnabled,
+    setScreenProtectionEnabled,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

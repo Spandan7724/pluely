@@ -15,7 +15,7 @@ pub struct AudioDeviceInfo {
 pub fn list_audio_output_devices() -> Result<Vec<AudioDeviceInfo>, String> {
     use cidre::core_audio as ca;
     
-    let mut devices = Vec::new();
+    let devices = Vec::new();
     
     // Get default output device
     let default_device = ca::System::default_output_device()
@@ -57,7 +57,7 @@ pub fn list_audio_output_devices() -> Result<Vec<AudioDeviceInfo>, String> {
 pub fn list_audio_output_devices() -> Result<Vec<AudioDeviceInfo>, String> {
     // use wasapi::{get_default_device, get_device_names, Direction};
         
-    let mut devices = Vec::new();
+    let devices = Vec::new();
     
     // Get default device
     // let default_device = get_default_device(&Direction::Render)

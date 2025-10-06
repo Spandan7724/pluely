@@ -17,6 +17,13 @@ pub fn setup_main_window(app: &mut App) -> Result<(), Box<dyn std::error::Error>
 
     position_window_top_center(&window, TOP_OFFSET)?;
 
+    #[cfg(target_os = "windows")]
+    {
+        if let Ok(hwnd) = window.hwnd() {
+            crate::screen_protection::ensure_screen_protection(hwnd.0 as isize);
+        }
+    }
+
     Ok(())
 }
 
