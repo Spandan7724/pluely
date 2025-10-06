@@ -28,6 +28,22 @@ export const AI_PROVIDERS = [
     streaming: true,
   },
   {
+    id: "copilot",
+    curl: `curl https://api.githubcopilot.com/chat/completions \\
+  -H "Content-Type: application/json" \\
+  -H "Accept: application/json" \\
+  -H "Authorization: Bearer {{API_TOKEN}}" \\
+  -H "Copilot-Integration-Id: pluely" \\
+  -H "Editor-Version: Pluely/1.0" \\
+  -H "User-Agent: Pluely/1.0" \\
+  -d '{
+    "model": "{{MODEL}}",
+    "messages": [{"role": "system", "content": "{{SYSTEM_PROMPT}}"}, {"role": "user", "content": [{"type": "text", "text": "{{TEXT}}"}, {"type": "image_url", "image_url": {"url": "data:image/png;base64,{{IMAGE}}", "detail": "high"}}]}]
+  }'`,
+    responseContentPath: "choices[0].message.content",
+    streaming: true,
+  },
+  {
     id: "grok",
     curl: `curl https://api.x.ai/v1/chat/completions \\
   -H "Content-Type: application/json" \\

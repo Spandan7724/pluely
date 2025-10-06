@@ -37,8 +37,8 @@ export const DEFAULT_SHORTCUT_ACTIONS: ShortcutAction[] = [
     description: "Capture screenshot",
     defaultKey: {
       macos: "cmd+shift+s",
-      windows: "ctrl+shift+s",
-      linux: "ctrl+shift+s",
+      windows: "ctrl+shift+z",
+      linux: "ctrl+shift+z",
     },
   },
 ];

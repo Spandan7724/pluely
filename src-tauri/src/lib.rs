@@ -135,7 +135,9 @@ pub fn run() {
         ])
         .setup(|app| {
             // Setup main window positioning
-            window::setup_main_window(app).expect("Failed to setup main window");
+            if let Err(error) = window::setup_main_window(app) {
+                eprintln!("Failed to setup main window: {}", error);
+            }
 
             // Initialize global shortcut plugin with centralized handler
             app.handle().plugin(

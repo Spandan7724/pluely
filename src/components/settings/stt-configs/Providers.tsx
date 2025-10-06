@@ -4,6 +4,19 @@ import curl2Json, { ResultJSON } from "@bany/curl-to-json";
 import { KeyIcon, TrashIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
+const SENSITIVE_VARIABLE_KEYS = [
+  "api_key",
+  "api_token",
+  "access_token",
+  "auth_token",
+  "bearer_token",
+  "client_secret",
+  "secret",
+  "token",
+  "license_key",
+  "password",
+];
+
 export const Providers = ({
   allSttProviders,
   selectedSttProvider,
@@ -25,18 +38,21 @@ export const Providers = ({
     }
   }, [selectedSttProvider?.provider]);
 
-  const findKeyAndValue = (key: string) => {
-    return sttVariables?.find((v) => v?.key === key);
+  const findSensitiveVariable = () => {
+    return sttVariables?.find((variable) =>
+      SENSITIVE_VARIABLE_KEYS.includes(variable?.key || "")
+    );
   };
 
-  const getApiKeyValue = () => {
-    const apiKeyVar = findKeyAndValue("api_key");
-    if (!apiKeyVar || !selectedSttProvider?.variables) return "";
-    return selectedSttProvider?.variables?.[apiKeyVar.key] || "";
+  const sensitiveVariable = findSensitiveVariable();
+
+  const getSensitiveValue = () => {
+    if (!sensitiveVariable || !selectedSttProvider?.variables) return "";
+    return selectedSttProvider?.variables?.[sensitiveVariable.key] || "";
   };
 
-  const isApiKeyEmpty = () => {
-    return !getApiKeyValue().trim();
+  const isSensitiveValueEmpty = () => {
+    return !getSensitiveValue().trim();
   };
 
   return (
@@ -75,10 +91,10 @@ export const Providers = ({
           description={`If you want to use different url or method, you can always create a custom provider.`}
         />
       ) : null}
-      {findKeyAndValue("api_key") ? (
+      {sensitiveVariable ? (
         <div className="space-y-2">
           <Header
-            title="API Key"
+            title={sensitiveVariable.value || "Secret"}
             description={`Enter your ${
               allSttProviders?.find(
                 (p) => p?.id === selectedSttProvider?.provider
@@ -93,51 +109,48 @@ export const Providers = ({
               <Input
                 type="password"
                 placeholder="**********"
-                value={getApiKeyValue()}
+                value={getSensitiveValue()}
                 onChange={(value) => {
-                  const apiKeyVar = findKeyAndValue("api_key");
-                  if (!apiKeyVar || !selectedSttProvider) return;
+                  if (!sensitiveVariable || !selectedSttProvider) return;
 
                   onSetSelectedSttProvider({
                     ...selectedSttProvider,
                     variables: {
                       ...selectedSttProvider.variables,
-                      [apiKeyVar.key]:
+                      [sensitiveVariable.key]:
                         typeof value === "string" ? value : value.target.value,
                     },
                   });
                 }}
                 onKeyDown={(e) => {
-                  const apiKeyVar = findKeyAndValue("api_key");
-                  if (!apiKeyVar || !selectedSttProvider) return;
+                  if (!sensitiveVariable || !selectedSttProvider) return;
 
                   onSetSelectedSttProvider({
                     ...selectedSttProvider,
                     variables: {
                       ...selectedSttProvider.variables,
-                      [apiKeyVar.key]: (e.target as HTMLInputElement).value,
+                      [sensitiveVariable.key]: (e.target as HTMLInputElement).value,
                     },
                   });
                 }}
                 disabled={false}
                 className="flex-1 h-11 border-1 border-input/50 focus:border-primary/50 transition-colors"
               />
-              {isApiKeyEmpty() ? (
+              {isSensitiveValueEmpty() ? (
                 <Button
                   onClick={() => {
-                    const apiKeyVar = findKeyAndValue("api_key");
-                    if (!apiKeyVar || !selectedSttProvider || isApiKeyEmpty())
+                    if (!sensitiveVariable || !selectedSttProvider || isSensitiveValueEmpty())
                       return;
 
                     onSetSelectedSttProvider({
                       ...selectedSttProvider,
                       variables: {
                         ...selectedSttProvider.variables,
-                        [apiKeyVar.key]: getApiKeyValue(),
+                        [sensitiveVariable.key]: getSensitiveValue(),
                       },
                     });
                   }}
-                  disabled={isApiKeyEmpty()}
+                  disabled={isSensitiveValueEmpty()}
                   size="icon"
                   className="shrink-0 h-11 w-11"
                   title="Submit API Key"
@@ -147,14 +160,13 @@ export const Providers = ({
               ) : (
                 <Button
                   onClick={() => {
-                    const apiKeyVar = findKeyAndValue("api_key");
-                    if (!apiKeyVar || !selectedSttProvider) return;
+                    if (!sensitiveVariable || !selectedSttProvider) return;
 
                     onSetSelectedSttProvider({
                       ...selectedSttProvider,
                       variables: {
                         ...selectedSttProvider.variables,
-                        [apiKeyVar.key]: "",
+                        [sensitiveVariable.key]: "",
                       },
                     });
                   }}
@@ -173,14 +185,24 @@ export const Providers = ({
 
       <div className="space-y-4 mt-2">
         {sttVariables
-          ?.filter(
-            (variable) => variable?.key !== findKeyAndValue("api_key")?.key
-          )
+          ?.filter((variable) => variable?.key !== sensitiveVariable?.key)
           .map((variable) => {
             const getVariableValue = () => {
               if (!variable?.key || !selectedSttProvider?.variables) return "";
               return selectedSttProvider.variables[variable.key] || "";
             };
+
+            const isSensitiveField = SENSITIVE_VARIABLE_KEYS.includes(
+              variable?.key || ""
+            );
+
+            const placeholder = `Enter ${
+              allSttProviders?.find(
+                (p) => p?.id === selectedSttProvider?.provider
+              )?.isCustom
+                ? "Custom Provider"
+                : selectedSttProvider?.provider
+            } ${variable?.key?.replace(/_/g, " ") || "value"}`;
 
             return (
               <div className="space-y-1" key={variable?.key}>
@@ -197,27 +219,41 @@ export const Providers = ({
                       : selectedSttProvider?.provider
                   }`}
                 />
-                <TextInput
-                  placeholder={`Enter ${
-                    allSttProviders?.find(
-                      (p) => p?.id === selectedSttProvider?.provider
-                    )?.isCustom
-                      ? "Custom Provider"
-                      : selectedSttProvider?.provider
-                  } ${variable?.key?.replace(/_/g, " ") || "value"}`}
-                  value={getVariableValue()}
-                  onChange={(value) => {
-                    if (!variable?.key || !selectedSttProvider) return;
+                {isSensitiveField ? (
+                  <Input
+                    type="password"
+                    placeholder={placeholder}
+                    value={getVariableValue()}
+                    onChange={(event) => {
+                      if (!variable?.key || !selectedSttProvider) return;
 
-                    onSetSelectedSttProvider({
-                      ...selectedSttProvider,
-                      variables: {
-                        ...selectedSttProvider.variables,
-                        [variable.key]: value,
-                      },
-                    });
-                  }}
-                />
+                      onSetSelectedSttProvider({
+                        ...selectedSttProvider,
+                        variables: {
+                          ...selectedSttProvider.variables,
+                          [variable.key]: event.target.value,
+                        },
+                      });
+                    }}
+                    className="h-11 border-1 border-input/50 focus:border-primary/50 transition-colors"
+                  />
+                ) : (
+                  <TextInput
+                    placeholder={placeholder}
+                    value={getVariableValue()}
+                    onChange={(value) => {
+                      if (!variable?.key || !selectedSttProvider) return;
+
+                      onSetSelectedSttProvider({
+                        ...selectedSttProvider,
+                        variables: {
+                          ...selectedSttProvider.variables,
+                          [variable.key]: value,
+                        },
+                      });
+                    }}
+                  />
+                )}
               </div>
             );
           })}

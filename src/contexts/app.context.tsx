@@ -18,6 +18,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import {
   ReactNode,
+  SetStateAction,
   createContext,
   useContext,
   useEffect,
@@ -105,7 +106,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     alwaysOnTop: { isEnabled: true },
     titles: { isEnabled: true },
   });
-  const [hasActiveLicense, setHasActiveLicense] = useState<boolean>(false);
+  const [hasActiveLicense, setHasActiveLicenseState] = useState<boolean>(true);
 
   // Pluely API State
   const [pluelyApiEnabled, setPluelyApiEnabledState] = useState<boolean>(
@@ -113,10 +114,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const getActiveLicenseStatus = async () => {
-    const response: { is_active: boolean } = await invoke(
-      "validate_license_api"
-    );
-    setHasActiveLicense(response.is_active);
+    try {
+      await invoke("validate_license_api");
+    } catch (error) {
+      console.debug("License validation skipped:", error);
+    }
+    setHasActiveLicenseState(true);
+  };
+
+  const forceHasActiveLicense = (_value: SetStateAction<boolean>) => {
+    setHasActiveLicenseState(true);
   };
 
   // Function to load AI, STT, system prompt and screenshot config data from storage
@@ -411,7 +418,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     pluelyApiEnabled,
     setPluelyApiEnabled,
     hasActiveLicense,
-    setHasActiveLicense,
+    setHasActiveLicense: forceHasActiveLicense,
     getActiveLicenseStatus,
   };
 

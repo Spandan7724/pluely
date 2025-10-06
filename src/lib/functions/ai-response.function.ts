@@ -246,6 +246,15 @@ export async function* fetchAIResponse(params: {
     const headers = deepVariableReplacer(curlJson.header || {}, allVariables);
     headers["Content-Type"] = "application/json";
 
+    if (provider?.id === "copilot") {
+      headers["Copilot-Integration-Id"] = headers["Copilot-Integration-Id"] || "pluely";
+      headers["Editor-Version"] = headers["Editor-Version"] || "Pluely/1.0";
+      headers["User-Agent"] = headers["User-Agent"] || "Pluely/1.0";
+      if (imagesBase64.length > 0) {
+        headers["Copilot-Vision-Request"] = "true";
+      }
+    }
+
     if (provider?.streaming) {
       if (typeof bodyObj === "object" && bodyObj !== null) {
         const streamKey = Object.keys(bodyObj).find(
@@ -259,16 +268,38 @@ export async function* fetchAIResponse(params: {
       }
     }
 
-    const fetchFunction = url?.includes("http") ? fetch : tauriFetch;
+    const isHttpUrl = typeof url === "string" && /^https?:/i.test(url);
 
     let response;
     try {
-      response = await fetchFunction(url, {
-        method: curlJson.method || "POST",
-        headers,
-        body: curlJson.method === "GET" ? undefined : JSON.stringify(bodyObj),
-        signal,
-      });
+      if (isHttpUrl) {
+        try {
+          response = await tauriFetch(url, {
+            method: curlJson.method || "POST",
+            headers,
+            body:
+              curlJson.method === "GET" ? undefined : JSON.stringify(bodyObj),
+            signal,
+          });
+        } catch (tauriError) {
+          // Fallback to window fetch if plugin fails (e.g., scheme not allowed)
+          response = await fetch(url, {
+            method: curlJson.method || "POST",
+            headers,
+            body:
+              curlJson.method === "GET" ? undefined : JSON.stringify(bodyObj),
+            signal,
+          });
+        }
+      } else {
+        response = await fetch(url, {
+          method: curlJson.method || "POST",
+          headers,
+          body:
+            curlJson.method === "GET" ? undefined : JSON.stringify(bodyObj),
+          signal,
+        });
+      }
     } catch (fetchError) {
       // Check if aborted
       if (
