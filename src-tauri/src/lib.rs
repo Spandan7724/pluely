@@ -103,6 +103,7 @@ pub fn run() {
             greet,
             get_app_version,
             window::set_window_height,
+            window::set_window_ignore_cursor_events,
             capture_to_base64,
             shortcuts::check_shortcuts_registered,
             shortcuts::get_registered_shortcuts,

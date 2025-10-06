@@ -105,6 +105,18 @@ export const useApp = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const updateCursorEvents = async () => {
+      try {
+        await invoke("set_window_ignore_cursor_events", { ignore: isHidden });
+      } catch (error) {
+        console.debug("Failed to update cursor events:", error);
+      }
+    };
+
+    updateCursorEvents();
+  }, [isHidden]);
+
   return {
     isHidden,
     setIsHidden,

@@ -123,3 +123,13 @@ pub fn set_window_height(window: tauri::WebviewWindow, height: u32) -> Result<()
 
     Ok(())
 }
+
+#[tauri::command]
+pub fn set_window_ignore_cursor_events(
+    window: tauri::WebviewWindow,
+    ignore: bool,
+) -> Result<(), String> {
+    window
+        .set_ignore_cursor_events(ignore)
+        .map_err(|e| format!("Failed to update cursor events: {e}"))
+}

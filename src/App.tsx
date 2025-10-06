@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   Card,
   Settings,
@@ -19,10 +20,29 @@ const App = () => {
     handleSelectConversation,
     handleNewConversation,
   } = useApp();
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    const className = "pluely-cursor-none";
+    const body = document.body;
+
+    if (!isHidden) {
+      body.classList.add(className);
+    } else {
+      body.classList.remove(className);
+    }
+
+    return () => {
+      body.classList.remove(className);
+    };
+  }, [isHidden]);
   return (
     <div
       className={`w-screen h-screen flex overflow-hidden justify-center items-start ${
-        isHidden ? "hidden pointer-events-none" : ""
+        isHidden ? "hidden pointer-events-none" : "cursor-none"
       }`}
     >
       <Card className="w-full flex flex-row items-center gap-2 p-2">
